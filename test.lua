@@ -1,8 +1,6 @@
-w = {x=0, y=0, label="console"}
-x = {math.sin(0), math.sin(1), math.sin(2)}
-w[1] = "another field"
-x.f = w
-print(w["x"]) --> 0
-print(w[1]) --> another field
-print(x.f[1]) --> another field
-w.x = nil -- remove field "x"
+os.setlocale("C")  -- 设置时区为 UTC
+while true do
+    local timestamp = io.read()
+    local date_table = os.date("*t", timestamp)
+    print(os.date("%Y-%m-%d %H:%M:%S", timestamp))  -- 输出格式化的日期和时间
+end
