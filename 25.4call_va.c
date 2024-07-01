@@ -39,13 +39,11 @@ double f(double x, double y)
 
 lua_State *load(char *filename)
 {
-    lua_State *L = luaL_newstate();
+    L = luaL_newstate();
     luaL_openlibs(L);
     if (luaL_loadfile(L, filename) || lua_pcall(L, 0, 0, 0))
         error(L, "cannot run configuration file: %s",
               lua_tostring(L, -1));
-
-    return L;
 }
 
 void call_va(const char *func, const char *sig, ...)
@@ -62,7 +60,7 @@ void call_va(const char *func, const char *sig, ...)
         switch (*sig++)
         {
         case 'd': /* double argument */
-            lua_pushnumber(L, va_arg(vl, double));
+            lua_pushnumber(L, va_arg(vl, int));
             break;
         case 'i': /* int argument */
             lua_pushnumber(L, va_arg(vl, int));
@@ -86,38 +84,39 @@ endwhile:
         error(L, "error running function `%s': %s",
               func, lua_tostring(L, -1));
     /* retrieve results */
-    nres = -nres; /* stack index of first result */
+    int ind = -nres; /* stack index of first result */
     while (*sig)
     { /* get results */
-    printf("啥玩意");
         switch (*sig++)
         {
         case 'd': /* double result */
-            if (!lua_isnumber(L, nres))
+            if (!lua_isnumber(L, ind))
                 error(L, "wrong result type");
-            *va_arg(vl, double *) = lua_tonumber(L, nres);
+            *va_arg(vl, double *) = lua_tonumber(L, ind);
             break;
         case 'i': /* int result */
-            if (!lua_isnumber(L, nres))
+            if (!lua_isnumber(L, ind))
                 error(L, "wrong result type");
-            *va_arg(vl, int *) = (int)lua_tonumber(L, nres);
+            *va_arg(vl, int *) = (int)lua_tonumber(L, ind);
             break;
         case 's': /* string result */
-            if (!lua_isstring(L, nres))
+            if (!lua_isstring(L, ind))
                 error(L, "wrong result type");
-            *va_arg(vl, const char **) = lua_tostring(L, nres);
+            *va_arg(vl, const char **) = lua_tostring(L, ind);
             break;
         default:
             error(L, "invalid option (%c)", *(sig - 1));
         }
-        nres++;
+        ind++;
     }
+    
+    lua_pop(L, nres);   // 退栈
     va_end(vl);
 }
 
 int main()
 {
-    L = load("25.3config.lua");
+    load("25.3config.lua");
 
     double z = 0;
     
